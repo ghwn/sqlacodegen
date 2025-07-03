@@ -217,3 +217,9 @@ def get_stdlib_module_names() -> set[str]:
         from stdlib_list import stdlib_list
 
         return set(sys.builtin_module_names) | set(stdlib_list(f"{major}.{minor}"))
+
+
+def to_snake_case(value: str) -> str:
+    result = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", value)
+    result = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", result)
+    return result.lower()

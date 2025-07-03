@@ -62,6 +62,7 @@ from .utils import (
     get_stdlib_module_names,
     qualified_table_name,
     render_callable,
+    to_snake_case,
     uses_default_name,
 )
 
@@ -1060,7 +1061,7 @@ class DeclarativeGenerator(TablesGenerator):
         local_names: set[str],
     ) -> None:
         column_attr.name = self.find_free_name(
-            column_attr.column.name, global_names, local_names
+            to_snake_case(column_attr.column.name), global_names, local_names
         )
 
     def generate_relationship_name(

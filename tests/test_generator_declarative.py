@@ -437,7 +437,7 @@ class Oglkrogk(Base):
     __tablename__ = 'oglkrogk'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    fehwiuhfiwID: Mapped[Optional[int]] = mapped_column(ForeignKey('fehwiuhfiw.id'))
+    fehwiuhfiw_id: Mapped[Optional[int]] = mapped_column('fehwiuhfiwID', ForeignKey('fehwiuhfiw.id'))
 
     fehwiuhfiw: Mapped[Optional['Fehwiuhfiw']] = \
 relationship('Fehwiuhfiw', back_populates='oglkrogk')

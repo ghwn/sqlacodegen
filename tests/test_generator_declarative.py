@@ -1678,3 +1678,104 @@ class TestDomainJson(Base):
     foo: Mapped[Optional[dict]] = mapped_column(DOMAIN('domain_json', {domain_type.__name__}(astext_type=Text(length=128)), not_null=False))
 """,
     )
+
+
+def test_udate_column_onupdate_func(generator: CodeGenerator) -> None:
+    """UDate 컬럼이 일반 타입(DateTime)일 때 onupdate=func.now()가 추가되는지 테스트"""
+    from sqlalchemy.types import DateTime
+
+    Table(
+        "test_table",
+        generator.metadata,
+        Column("id", INTEGER, primary_key=True),
+        Column("UDate", DateTime),  # UDate 컬럼 (DateTime 타입)
+    )
+
+    validate_code(
+        generator.generate(),
+        """\
+from typing import Optional
+
+from sqlalchemy import DateTime, Integer, func
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+import datetime
+
+class Base(DeclarativeBase):
+    pass
+
+
+class TestTable(Base):
+    __tablename__ = 'test_table'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    u_date: Mapped[Optional[datetime.datetime]] = mapped_column('UDate', DateTime, onupdate=func.now())
+        """,
+    )
+
+
+def test_udate_column_onupdate_smalldatetime(generator: CodeGenerator) -> None:
+    """UDate 컬럼이 SMALLDATETIME일 때 onupdate=text('(getdate())')가 추가되는지 테스트"""
+    from sqlalchemy.dialects.mssql import SMALLDATETIME
+
+    Table(
+        "test_table",
+        generator.metadata,
+        Column("id", INTEGER, primary_key=True),
+        Column("UDate", SMALLDATETIME),  # UDate 컬럼 (SMALLDATETIME)
+    )
+
+    validate_code(
+        generator.generate(),
+        """\
+from typing import Optional
+
+from sqlalchemy import Integer, text
+from sqlalchemy.dialects.mssql import SMALLDATETIME
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+import datetime
+
+class Base(DeclarativeBase):
+    pass
+
+
+class TestTable(Base):
+    __tablename__ = 'test_table'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    u_date: Mapped[Optional[datetime.datetime]] = mapped_column('UDate', SMALLDATETIME, onupdate=text('(getdate())'))
+        """,
+    )
+
+
+def test_udate_column_onupdate_datetime2(generator: CodeGenerator) -> None:
+    """UDate 컬럼이 mssql.DATETIME2 타입일 때 onupdate=func.now()가 추가되는지 테스트"""
+    from sqlalchemy.dialects.mssql import DATETIME2
+
+    Table(
+        "test_table",
+        generator.metadata,
+        Column("id", INTEGER, primary_key=True),
+        Column("UDate", DATETIME2),  # UDate 컬럼 (DATETIME2 타입)
+    )
+
+    validate_code(
+        generator.generate(),
+        """\
+from typing import Optional
+
+from sqlalchemy import Integer, func
+from sqlalchemy.dialects.mssql import DATETIME2
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+import datetime
+
+class Base(DeclarativeBase):
+    pass
+
+
+class TestTable(Base):
+    __tablename__ = 'test_table'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    u_date: Mapped[Optional[datetime.datetime]] = mapped_column('UDate', DATETIME2, onupdate=func.now())
+        """,
+    )

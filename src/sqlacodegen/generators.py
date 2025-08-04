@@ -495,6 +495,17 @@ class TablesGenerator(CodeGenerator):
         if comment:
             kwargs["comment"] = repr(comment)
 
+        if (
+            column.name.lower() in ["udate", "updated_at", "updated_date"]
+            and not is_table
+        ):
+            if column.type.__class__.__name__ == "SMALLDATETIME":
+                self.add_literal_import("sqlalchemy", "text")
+                kwargs["onupdate"] = "text('(getdate())')"
+            else:
+                self.add_literal_import("sqlalchemy", "func")
+                kwargs["onupdate"] = "func.now()"
+
         return self.render_column_callable(is_table, *args, **kwargs)
 
     def render_column_callable(self, is_table: bool, *args: Any, **kwargs: Any) -> str:
